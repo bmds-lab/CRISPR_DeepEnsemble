@@ -10,11 +10,18 @@ Leveraging uncertainty quantification to optimise CRISPR guide RNA selection
 - [Python 3.8+](https://www.python.org/)
 - [Jupyter](https://jupyter.org/)
 
+Optional (Only required if you intend to run the data preprocessing again. We have already provided the final dataset, `merged_X.pt`, `merged_Features.pt` and `merged_Y.pt`)
+- [Bowtie2](https://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
+- [SAMtools](https://www.htslib.org/)
+
 ## Getting started
 
 - `CRISPR_DeepEnsemble.ipynb`: A notebook containing instruction on how to use the deep ensemble. Utilises the sample data from provided in the `data` directory.
 
 - `CRISPR_DeepEnsemble.py`: A python file containing the implementation of the deep ensemble. See `CRISPR_DeepEnsemble.ipynb` for an example implementation.
+
+## Data
+Data was obtained from Kim et al. (2019), Wang et al. (2019), Kim et al. (2020) and Xiang et al. (2021). All datasets have a corresponding folder in the `data` directory. Each folder contains a notebook that has details on how the data was obtained and processed.
 
 ## References
 
@@ -26,8 +33,10 @@ Bradford, J., & Perrin, D. (2019). Improving CRISPR guide design with consensus 
 
 Chari, R., Yeo, N. C., Chavez, A., & Church, G. M. (2017). sgRNA Scorer 2.0: a species-independent model to predict CRISPR/Cas9 activity. ACS synthetic biology, 6(5), 902-904.
 
-Lorenz, R., Bernhart, S. H., Zu Siederdissen, C. H., Tafer, H., Flamm, C., Stadler, P. F., & Hofacker, I. L. (2011). ViennaRNA Package 2.0. Algorithms for molecular biology, 6(1), 1-14.
+Kim, H. K., Kim, Y., Lee, S., Min, S., Bae, J. Y., Choi, J. W., Park, J., Jung, D., Yoon, S., & Kim, H. H. (2019). SpCas9 activity prediction by DeepSpCas9, a deep learning–based model with high generalization performance. Science Advances, 5(11), eaax9249. 
 
-Montague, T. G., Cruz, J. M., Gagnon, J. A., Church, G. M., & Valen, E. (2014). CHOPCHOP: a CRISPR/Cas9 and TALEN web tool for genome editing. Nucleic acids research, 42(W1), W401-W407.
+Kim, N., Kim, H. K., Lee, S., Seo, J. H., Choi, J. W., Park, J., Min, S., Yoon, S., Cho, S.-R., & Kim, H. H. (2020). Prediction of the sequence-specific cleavage activity of Cas9 variants. Nature Biotechnology, 38(11), 1328-1336.
 
-Sunagawa, G. A., Sumiyama, K., Ukai-Tadenuma, M., Perrin, D., Fujishima, H., Ukai, H., ... & Shimizu, Y. (2016). Mammalian reverse genetics without crossing reveals Nr3a as a short-sleeper gene. Cell reports, 14(3), 662-677.
+Wang, D., Zhang, C., Wang, B., Li, B., Wang, Q., Liu, D., Wang, H., Zhou, Y., Shi, L., Lan, F., & Wang, Y. (2019). Optimized CRISPR guide RNA design for two high-fidelity Cas9 variants by deep learning. Nature Communications, 10(1), 4284.
+
+Xiang, X., Corsi, G. I., Anthon, C., Qu, K., Pan, X., Liang, X., Han, P., Dong, Z., Liu, L., Zhong, J., Ma, T., Wang, J., Zhang, X., Jiang, H., Xu, F., Liu, X., Xu, X., Wang, J., Yang, H., Bolund, L., Church, G. M., Lin, L., Gorodkin, J., & Luo, Y. (2021). Enhancing CRISPR-Cas9 gRNA efficiency prediction by data integration and deep learning. Nature Communications, 12(1), 3238.
