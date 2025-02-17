@@ -1,8 +1,12 @@
 import torch
-from torch.nn import Conv2d, ReLU, AvgPool1d, Linear, LazyLinear, ReLU, Module 
-from torch.utils.data import Dataset, DataLoader
+import pickle
+import shutil
+import tempfile
 from tqdm import tqdm
+from pathlib import Path
 import matplotlib.pyplot as plt
+from torch.utils.data import Dataset, DataLoader
+from torch.nn import Conv2d, ReLU, AvgPool1d, Linear, LazyLinear, ReLU, Module 
 
 class CRISPRnet(Module):
     def __init__(self, nfeats = 1):
@@ -68,9 +72,9 @@ class RegressionDeepEnsemble:
     Assumes that the output variable is a scalar. 
     """
 
-    def __init__(self, BaseNet: torch.nn.Module, dataset, n_estimators=5,
-                 batch_size=25, response_var = torch.distributions.Normal,
-                 trans_func = lambda x: x):
+    def __init__(self, BaseNet: torch.nn.Module=CRISPRnet, dataset='', n_estimators=5,
+                 batch_size=25, response_var = torch.distributions.Normal, trans_func=None,
+                 load_from_pickle=None):
         
         """Deep Ensembles for Univariate Regression
 
@@ -94,14 +98,20 @@ class RegressionDeepEnsemble:
                 model to logit(y) and then to obtain predictions we apply inverse_logit(y).  
                 
                 Defaults to identity function.
+            load_from_pickle (path_like): Path of the zip file to load model from
         """
-        
-        self.ensemble = [BaseNet() for k in range(n_estimators)] 
-        self.n_estimators = n_estimators
-        self.loader = [DataLoader(dataset = dataset, batch_size=batch_size, shuffle=True) for k in range(n_estimators)]
-        self.response_var = response_var
-        self.trans_func = trans_func 
-        
+        if load_from_pickle:
+            self.load(load_from_pickle)
+        else:
+            self.ensemble = [BaseNet() for k in range(n_estimators)] 
+            self.n_estimators = n_estimators
+            self.loader = [DataLoader(dataset = dataset, batch_size=batch_size, shuffle=True) for k in range(n_estimators)]
+            self.response_var = response_var
+            self.trans_func = self._default_trans_func if trans_func is None else trans_func
+
+    def _default_trans_func(self, x):
+        return x
+
     def train_ensemble(self, n_epochs=10, verbose=False):
         """Train ensemble model. 
 
@@ -240,6 +250,45 @@ class RegressionDeepEnsemble:
         plt.title(f"Deep Ensemble: {self.n_estimators} Models")
         plt.legend()
         plt.show()
+
+    def save(self, save_path):
+        """A Function that will save the class object in a zip to load and use later 
+
+        Args:
+            save_path (path_like): location to save the .zip file
+        """
+        save_path = Path(save_path)
+        with tempfile.TemporaryDirectory() as tmpDir:
+            tmpPath = Path(tmpDir)
+            with open(tmpPath / 'n_estimators.pkl', 'wb') as outFile:
+                pickle.dump(self.n_estimators, outFile)
+            with open(tmpPath / 'trans_func.pkl', 'wb') as outFile:
+                pickle.dump(self.trans_func, outFile)
+            for i, model in enumerate(self.ensemble):
+                torch.save(model, tmpPath / f'{i}.pt')
+            torch.save(self.loader, tmpPath / 'loader.pt')
+            torch.save(self.response_var, tmpPath / 'response_var.pt')
+            shutil.make_archive(save_path.parent / save_path.stem, 'zip', tmpDir)
+
+    def load(self, load_path):
+        """A Function that will save the class object in a zip to load and use later 
+
+        Args:
+            load_path (path_like): the .zip to load the model from
+        """
+        load_path = Path(load_path)
+        with tempfile.TemporaryDirectory() as tmpDir:
+            tmpPath = Path(tmpDir)
+            shutil.unpack_archive(load_path, tmpDir)
+            with open(tmpPath / 'n_estimators.pkl', 'rb') as inFile:
+                self.n_estimators = pickle.load(inFile)
+            with open(tmpPath / 'trans_func.pkl', 'rb') as inFile:
+                self.trans_func = pickle.load(inFile)
+            self.ensemble = []
+            for i in range(self.n_estimators):
+                self.ensemble.append(torch.load(tmpPath / f'{i}.pt'))
+            self.loader = torch.load(tmpPath / 'loader.pt')
+            self.response_var = torch.load(tmpPath / 'response_var.pt')
 
 class Seqs_and_Features(Dataset):   
     def __init__(self, S, F, y):
