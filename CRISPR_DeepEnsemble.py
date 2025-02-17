@@ -74,7 +74,7 @@ class RegressionDeepEnsemble:
 
     def __init__(self, BaseNet: torch.nn.Module=CRISPRnet, dataset='', n_estimators=5,
                  batch_size=25, response_var = torch.distributions.Normal, trans_func=None,
-                 load_from_pickle=None):
+                 load_from=None):
         
         """Deep Ensembles for Univariate Regression
 
@@ -100,8 +100,8 @@ class RegressionDeepEnsemble:
                 Defaults to identity function.
             load_from_pickle (path_like): Path of the zip file to load model from
         """
-        if load_from_pickle:
-            self.load(load_from_pickle)
+        if load_from:
+            self.load(load_from)
         else:
             self.ensemble = [BaseNet() for k in range(n_estimators)] 
             self.n_estimators = n_estimators
